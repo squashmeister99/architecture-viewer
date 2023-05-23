@@ -3,15 +3,15 @@ title "Oauth 2.0 based Epic Launch"
 hide footbox
 autonumber "[0] "
 
-participant "Patient" as Client << (U, #ccebc5) user >>
-participant "Browser" as Browser << (U, #ccebc5) user >>
+participant "Patient" as Patient << (U, #green) user >>
+participant "Browser" as Browser << (U, #green) user >>
 
-participant "Vidyo Epic Service" as VidyoEpicService << (C, #b3cde3) Vidyo >>
+participant "Vidyo Epic Service" as VidyoEpicService << (C, #aqua) Vidyo >>
 note over VidyoEpicService
 manages all communication with Epic backend service
-participant "Portal" as Portal << (C, #b3cde3) Vidyo >>
-participant "Portal Database" as PortalDB << (C, #b3cde3) Vidyo >>
-participant "VidyoConnect App" as VidyoConnect << (C, #b3cde3) Vidyo >>
+participant "Portal" as Portal << (C, #aqua) Vidyo >>
+participant "Portal Database" as PortalDB << (C, #aqua) Vidyo >>
+participant "VidyoConnect App" as VidyoConnect << (C, #aqua) Vidyo >>
 
 participant "My Chart" as Epic << (E, #fbb4ae) EPIC >>
 participant "Epic Web Service" as EPS << (E, #fbb4ae) EPIC >>
