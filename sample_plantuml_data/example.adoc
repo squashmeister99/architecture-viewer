@@ -25,7 +25,7 @@ Epic -> Patient: Patient receives telehealth invite link with {launchToken, FHIR
 Patient -> Portal: click on invite link sends {launchToken, FHIR_Server_URL}
 Portal-> PortalDB: cache {launchToken, FHIR_Server_URL} with new GUID as key
 PortalDB->Portal: return GUID
-Portal->Browser: landing page with {GUID} as URl parameter
+Portal->Browser: landing page with {GUID} as URL parameter
 
 
 
