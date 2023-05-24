@@ -9,20 +9,16 @@ participant "Patient" as Patient << (U, #ccebc5) user >>
 
 box "Vidyo Components" #LightBlue
 participant "Vidyo Epic Service" as VidyoEpicService << (C, #b3cde3) Vidyo >>
-participant "Portal" as Portal << (C, #b3cde3) Vidyo >>
-participant "Portal Database" as PortalDB << (C, #b3cde3) Vidyo >>
-participant "VidyoConnect App" as VidyoConnect << (C, #b3cde3  ) Vidyo >>
 end box
 
 box "Epic Components" #LightGreen
-participant "My Chart" as Epic << (E, #fbb4ae) EPIC >>
 participant "Epic Configuration" as EpicConfig << (E, #fbb4ae) EPIC >>
 participant "Epic Web Service" as EPS << (E, #fbb4ae) EPIC >>
 end box
 
 ==Backend Service Oauth 2.0 Handshake ==
 VidyoEpicService<->EpicConfig : register backend service clientID, publicKey
-VidyoEpicService->VidyoEpicService : generate JWT containing clientID \n signed with privateKey
+VidyoEpicService->VidyoEpicService : generate JWT containing clientID signed with privateKey
 VidyoEpicService->EPS : exchange JWTToken for accessToken 
 return accessToken
 VidyoEpicService->VidyoEpicService : cache accessToken
