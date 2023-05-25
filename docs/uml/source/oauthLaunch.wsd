@@ -28,20 +28,24 @@ Epic -> Patient: Patient receives telehealth invite link \n with {launchToken, F
 Patient -> Portal: click on invite link sends {launchToken, FHIR_Server_URL}
 Portal-> PortalDB: cache {launchToken, FHIR_Server_URL} with new GUID as key
 return GUID
-Portal->VidyoEpicService: start Oauth 2.0 sequence \n {GUID, launchToken, FHIR_Server_URL}
+Portal->Browser: landing page displayed
+Browser->VidyoConnect : protocol handler with GUID is prepared
+VidyoConnect->Portal : Get Epic Service URL
+return epicServiceURL
+VidyoConnect->PortalDB : query using GUID as key
+return {launchToken, FHIR_Server_URL}
+VidyoConnect->VidyoEpicService: start Oauth 2.0 sequence \n {GUID, launchToken, FHIR_Server_URL}
 VidyoEpicService->EPS : pass { launchToken } and request authorizationCode 
 return authorizationCode
 VidyoEpicService->EPS : exchange authorizationCode for accessToken 
-return {accessToken, meetingDetails}
-VidyoEpicService->VidyoEpicService : caches accessToken in KeyValue store with GUID as key
-VidyoEpicService->Portal : send meeting details to Portal
+return JSON blob with {accessToken, meetingDetails}
+VidyoEpicService->VidyoEpicService : caches accessToken in Key-Value store {key : GUID, value : accessToken}
+VidyoEpicService->Portal : call API to create schedule room {meetingDetails}
 Portal->Portal : create a new meeting room
-Portal->Browser : create join link with roomID & other context parameters
-Browser->VidyoConnect : launch VidyoConnect query params (portal, roomKey, name, etc.)
-VidyoConnect->Portal: joinCall
-Portal->VidyoEpicService: notify connection established for (GUID)
-VidyoEpicService->VidyoEpicService: fetch accessToken for GUID
-VidyoEpicService->EPS : SetExternalConnectionStatus(1)
+Portal->VidyoEpicService : return roomKey
+VidyoEpicService->VidyoConnect : return {roomKey, displayName, other details }
+VidyoConnect->Portal: joinCall {roomKey}
+
 
 
 
