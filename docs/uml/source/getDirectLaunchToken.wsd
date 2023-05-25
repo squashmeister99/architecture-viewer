@@ -18,7 +18,7 @@ participant "VidyoConnect App" as VidyoConnect << (C, #b3cde3  ) Vidyo >>
 end box
 
 box "Epic Components" #LightCoral
-participant "My Chart" as Epic << (E, #fbb4ae) EPIC >>
+participant "Epic" as Epic << (E, #fbb4ae) EPIC >>
 participant "Epic Web Service" as EPS << (E, #fbb4ae) EPIC >>
 end box
 
@@ -29,4 +29,13 @@ VidyoEpicService->EPS : exchange JWTToken for accessToken
 return accessToken
 VidyoEpicService->VidyoEpicService : cache accessToken
 
+== Get Telehealth Direct Launch Token Flow ==
+Epic->Patient: email/SMS link with {directJoinToken}
+Patient->Portal: user clicks on inviteLink {directJoinToken}
+Portal->PortalDB: cache {directJoinToken} generate { GUID }
+return GUID
+Portal->VidyoEpicService: GetTeleHealthMeetingDetails {GUID, directJoinToken}
+VidyoEpicService->EPS : call GetTelehealthDirectLaunchToken(directJoinToken)
+return launchToken 
+note over VidyoEpicService : usual launch token flow after this point
 @enduml
