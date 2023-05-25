@@ -5,22 +5,38 @@ hide unlinked
 
 autonumber "[0] "
 
+box "User" #LightGreen
 participant "Patient" as Patient << (U, #ccebc5) user >>
+participant "Browser" as Browser << (U, #ccebc5) user >>
+end box
 
 box "Vidyo Components" #LightBlue
 participant "Vidyo Epic Service" as VidyoEpicService << (C, #b3cde3) Vidyo >>
+participant "Portal" as Portal << (C, #b3cde3) Vidyo >>
+participant "Portal Database/Query Parameter Service" as PortalDB << (C, #b3cde3) Vidyo >>
+participant "VidyoConnect App" as VidyoConnect << (C, #b3cde3  ) Vidyo >>
 end box
 
-box "Epic Components" #LightGreen
-participant "Epic Configuration" as EpicConfig << (E, #fbb4ae) EPIC >>
+box "Epic Components" #LightCoral
+participant "Epic" as Epic << (E, #fbb4ae) EPIC >>
 participant "Epic Web Service" as EPS << (E, #fbb4ae) EPIC >>
 end box
 
 ==Backend Service Oauth 2.0 Handshake ==
-VidyoEpicService<->EpicConfig : register backend service clientID, publicKey
-VidyoEpicService->VidyoEpicService : generate JWT containing clientID signed with privateKey
+VidyoEpicService<->Epic : register backend service clientID, publicKey
+VidyoEpicService->VidyoEpicService : generate JWT containing clientID \n signed with privateKey
 VidyoEpicService->EPS : exchange JWTToken for accessToken 
-return accessToken
+EPS->EPS : validate JWT Token
+VidyoEpicService<--EPS : accessToken
 VidyoEpicService->VidyoEpicService : cache accessToken
 
+== Get Telehealth Direct Launch Token Flow ==
+Epic->Patient: email/SMS link with {directJoinToken}
+Patient->Portal: user clicks on inviteLink {directJoinToken}
+Portal->PortalDB: cache {directJoinToken} generate { GUID }
+return GUID
+Portal->VidyoEpicService: GetTeleHealthMeetingDetails {GUID, directJoinToken}
+VidyoEpicService->EPS : call GetTelehealthDirectLaunchToken(directJoinToken) using accessToken credentials
+return launchToken 
+note over VidyoEpicService : usual launch token flow after this point
 @enduml

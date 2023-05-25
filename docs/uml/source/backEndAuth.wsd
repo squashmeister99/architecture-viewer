@@ -23,10 +23,11 @@ participant "Epic Web Service" as EPS << (E, #fbb4ae) EPIC >>
 end box
 
 ==Backend Service Oauth 2.0 Handshake ==
-VidyoEpicService<->EpicConfig : register backend service clientID, publicKey
+VidyoEpicService<->EPIC : register backend service clientID, publicKey
 VidyoEpicService->VidyoEpicService : generate JWT containing clientID \n signed with privateKey
 VidyoEpicService->EPS : exchange JWTToken for accessToken 
-return accessToken
+EPS->EPS : validate JWT Token
+VidyoEpicService<--EPS : return accessToken
 VidyoEpicService->VidyoEpicService : cache accessToken
 
 @enduml
