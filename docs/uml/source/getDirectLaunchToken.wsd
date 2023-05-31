@@ -1,5 +1,5 @@
 @startuml
-title "Direct Join Flow : Joining a call through an SMS/email link"
+title "Patient joining a call through an SMS/email link (i.e. outside MyChart)"
 hide footbox
 hide unlinked
 autonumber "[0] "

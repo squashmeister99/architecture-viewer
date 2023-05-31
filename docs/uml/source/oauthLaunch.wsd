@@ -1,5 +1,5 @@
 @startuml
-title "Oauth 2.0 based Epic Launch"
+title "Patient Launch from Epic MyChart using Oauth 2.0 Authentication"
 hide footbox
 hide unlinked
 autonumber "[0] "
