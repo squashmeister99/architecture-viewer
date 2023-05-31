@@ -18,16 +18,19 @@ participant "VidyoConnect App" as VidyoConnect << (C, #b3cde3  ) Vidyo >>
 end box
 
 box "Epic Components" #LightCoral
-participant "My Chart" as Epic << (E, #fbb4ae) EPIC >>
+participant "Epic App Orchard" as EPIC << (E, #fbb4ae) EPIC >>
 participant "Epic Web Service" as EPS << (E, #fbb4ae) EPIC >>
 end box
 
-==Backend Service Oauth 2.0 Handshake ==
-VidyoEpicService<->EPIC : register backend service clientID, publicKey
-VidyoEpicService->VidyoEpicService : generate JWT containing clientID \n signed with privateKey
-VidyoEpicService->EPS : exchange JWTToken for accessToken 
-EPS->EPS : validate JWT Token
-VidyoEpicService<--EPS : return accessToken
-VidyoEpicService->VidyoEpicService : cache accessToken
-
+==Register Backend Service with Epic App Orchard==
+VidyoEpicService->VidyoEpicService: generate **{publicKey, privateKey}**
+VidyoEpicService<->EPIC : register backed app with **clientID, publicKey**
+==Get backend service access token==
+VidyoEpicService->VidyoEpicService : generate **JWT** containing **clientID** \n signed with **privateKey**
+VidyoEpicService->EPS : exchange **JWT** for **backendServiceAccessToken** 
+EPS->EPS : validate **JWT**
+VidyoEpicService<--EPS : return **backendServiceAccessToken**
+VidyoEpicService->VidyoEpicService : cache **backendServiceAccessToken**
+==Using the backendServiceAccessToken==
+VidyoEpicService->EPS : use **backendServiceAccessToken** \nfor calling **GetTelehealthDirectLaunchToken()**
 @enduml
