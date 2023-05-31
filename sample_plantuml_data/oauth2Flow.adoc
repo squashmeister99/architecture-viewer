@@ -1,6 +1,7 @@
 @startuml
 title "Oauth 2.0 based Epic Launch"
 hide footbox
+hide unlinked
 autonumber "[0] "
 
 box "User" #LightGreen
@@ -22,33 +23,37 @@ participant "Epic Web Service" as EPS << (E, #fbb4ae) EPIC >>
 end box
 
 ==Telehealth Visit Scheduled==
-Epic -> Epic: configure visit details  (name, patientID, appt time, inviteID etc..)
-Epic -> Patient: Patient receives telehealth invite link in MyChart account
+Epic -> Epic: configure visit details   (name, patientID, appt time, inviteID etc..)
+Epic -> Patient: Patient receives telehealth  invite link in MyChart account
 
 == Patient clicks on link==
-Patient -> Portal: send {launchToken, FHIR_Server_URL} to preconfigured portal URL
-Portal-> Portal: cache {launchToken, FHIR_Server_URL, clientID} with new {GUID} as key
+Patient->Portal: send {launchToken, FHIR_Server_URL}  to preconfigured portal URL
+Portal-> PortalDB: cache {launchToken, FHIR_Server_URL, clientID}  with  {GUID} as key
+Portal<- PortalDB:return {GUID}
 Portal->Browser: landing page with {GUID} parameter
 Browser->VidyoConnect : App is launched with {GUID} param
-VidyoConnect->VidyoConnect: display spinner to User
-VidyoConnect->Portal :  Get Vidyo Epic Service URL
-return vidyoEpicServiceURL
+VidyoConnect->VidyoConnect: display spinner
+VidyoConnect->Portal :  {Vidyo Epic Service URL
+VidyoConnect<-Portal :return vidyoEpicServiceURL
 VidyoConnect->Portal : Get Event Server URL
-return eventServer URL
+VidyoConnect<-Portal :return eventServer URL
 VidyoConnect->EventServer: subscribe to Oauth 2.0 topic with {GUID} as key/ID
-VidyoConnect->Portal : fetch  {launchToken, FHIR_Server_URL, clientID} using {GUID} key
-return {launchToken, FHIR_Server_URL, clientID}
+VidyoConnect->PortalDB : fetch  {launchToken, FHIR_Server_URL, clientID}  using {GUID} key
+VidyoConnect<-PortalDB : return {launchToken, FHIR_Server_URL, clientID}
 == Oauth 2.0 Handshake with Epic==
 VidyoConnect->VidyoEpicService: start Oauth 2.0 sequence  {GUID, launchToken, FHIR_Server_URL, clientID}
 VidyoEpicService->EPS : exchange { launchToken } for authorizationCode 
-return authorizationCode
+VidyoEpicService<-EPS : return authorizationCode
 VidyoEpicService->EPS : exchange authorizationCode for accessToken 
-return JSON blob with {accessToken, meetingDetails}
+VidyoEpicService<-EPS : return JSON blob with {accessToken, meetingDetails}
 == Meeting room creation ==
-VidyoEpicService->VidyoEpicService : cache accessToken in Key-Value store with {GUID} as key 
+VidyoEpicService->VidyoEpicService : cache accessToken in Key-Value store  with {GUID} as key 
 VidyoEpicService->Portal : call API to create schedule room {meetingDetails}
 Portal->Portal : create a new meeting room
 Portal->Portal : store meeting details in database (endpointTable ?)
 Portal->EventServer : send event notification with room details
 EventServer->VidyoConnect: receive {roomKey, displayName, ... } in notification payload
-VidyoConnect->VidyoConnect: end spinner & display joinCall button for meeting room
+VidyoConnect->VidyoConnect: end spinner & display  joinCall button for meeting room
+
+
+@enduml
