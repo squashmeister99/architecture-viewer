@@ -33,7 +33,7 @@ Portal<- PortalDB:return {GUID}
 Portal->Browser: landing page with {GUID} parameter
 Browser->VidyoConnect : App is launched with {GUID} param
 VidyoConnect->VidyoConnect: display spinner
-VidyoConnect->Portal :  {Vidyo Epic Service URL
+VidyoConnect->Portal :  Get Vidyo Epic Service URL
 VidyoConnect<-Portal :return vidyoEpicServiceURL
 VidyoConnect->Portal : Get Event Server URL
 VidyoConnect<-Portal :return eventServer URL
