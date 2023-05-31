@@ -6,7 +6,7 @@ hide unlinked
 autonumber "[0] "
 
 box "User" #LightGreen
-participant "Patient" as Patient << (U, #ccebc5) user >>
+participant "Patient Relative" as Patient << (U, #ccebc5) user >>
 participant "Browser" as Browser << (U, #ccebc5) user >>
 end box
 

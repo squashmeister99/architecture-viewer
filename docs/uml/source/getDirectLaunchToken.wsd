@@ -1,12 +1,11 @@
 @startuml
-title "Backend Oauth 2.0 with Epic"
+title "Direct Join Flow : Joining a call through an SMS/email link"
 hide footbox
 hide unlinked
-
 autonumber "[0] "
 
 box "User" #LightGreen
-participant "Patient" as Patient << (U, #ccebc5) user >>
+participant "Patient with SMS link" as Patient << (U, #ccebc5) user >>
 participant "Browser" as Browser << (U, #ccebc5) user >>
 end box
 
@@ -14,6 +13,7 @@ box "Vidyo Components" #LightBlue
 participant "Vidyo Epic Service" as VidyoEpicService << (C, #b3cde3) Vidyo >>
 participant "Portal" as Portal << (C, #b3cde3) Vidyo >>
 participant "Portal Database/Query Parameter Service" as PortalDB << (C, #b3cde3) Vidyo >>
+participant "Event Server" as EventServer << (C, #b3cde3) Vidyo >>
 participant "VidyoConnect App" as VidyoConnect << (C, #b3cde3  ) Vidyo >>
 end box
 
@@ -22,21 +22,43 @@ participant "Epic" as Epic << (E, #fbb4ae) EPIC >>
 participant "Epic Web Service" as EPS << (E, #fbb4ae) EPIC >>
 end box
 
-==Backend Service Oauth 2.0 Handshake ==
-VidyoEpicService<->Epic : register backend service clientID, publicKey
-VidyoEpicService->VidyoEpicService : generate JWT containing clientID \n signed with privateKey
-VidyoEpicService->EPS : exchange JWTToken for accessToken 
-EPS->EPS : validate JWT Token
-VidyoEpicService<--EPS : accessToken
-VidyoEpicService->VidyoEpicService : cache accessToken
+==Telehealth Visit Scheduled==
+Epic -> Epic: configure visit details \n (name, patientID, appt time, inviteID etc..)
+Epic -> Patient: Patient receives SMS link to portal with **directJoinToken** 
 
-== Get Telehealth Direct Launch Token Flow ==
-Epic->Patient: email/SMS link with {directJoinToken}
-Patient->Portal: user clicks on inviteLink {directJoinToken}
-Portal->PortalDB: cache {directJoinToken} generate { GUID }
-return GUID
-Portal->VidyoEpicService: GetTeleHealthMeetingDetails {GUID, directJoinToken}
-VidyoEpicService->EPS : call GetTelehealthDirectLaunchToken(directJoinToken) using accessToken credentials
-return launchToken 
-note over VidyoEpicService : usual launch token flow after this point
+== Patient clicks on SMS link==
+Patient -> Portal: send **directJoinToken** to portal URL
+Portal->VidyoEpicService : send **directJoinToken** 
+VidyoEpicService->EPS : call GetTelehealthDirectLaunchToken to exchange\n **directJoinToken** for **launchToken** 
+return **launchToken** 
+Portal<--VidyoEpicService : return **launchToken** 
+Portal-> PortalDB: cache **{launchToken, clientID }**  \nwith  {GUID} as key
+return **{GUID}**
+Portal->Browser: landing page with **{GUID}** parameter
+Browser->VidyoConnect : App is launched with **{GUID}** param
+VidyoConnect->VidyoConnect: display spinner
+VidyoConnect->Portal :  Get Vidyo Epic Service URL
+return **vidyoEpicServiceURL**
+VidyoConnect->Portal : Get Event Server URL
+return **eventServerURL**
+VidyoConnect->EventServer: subscribe to Oauth 2.0 topic with **{GUID}** as key/ID
+VidyoConnect->PortalDB : fetch  **{launchToken, clientID}** \nusing {GUID} key
+return **{launchToken, clientID}**
+== Oauth 2.0 Handshake with Epic==
+VidyoConnect->VidyoEpicService: start Oauth 2.0 sequence \n{GUID, launchToken,  , clientID}
+VidyoEpicService->EPS : exchange **{launchToken}** for **authorizationCode** 
+return **authorizationCode**
+VidyoEpicService->EPS : exchange **authorizationCode** for **accessToken** 
+return **JSON** with **{accessToken, meetingDetails}**
+== Meeting room creation ==
+VidyoEpicService->VidyoEpicService : cache **accessToken** in Key-Value store \nwith **{GUID}** as key 
+VidyoEpicService->Portal : create room **{meetingDetails}**
+Portal->Portal : create a new meeting room
+Portal->Portal : store meeting details in database (endpointTable ?)
+Portal->EventServer : send event notification with room details
+EventServer->VidyoConnect: receive **{roomKey, displayName, ...}** in notification payload
+VidyoConnect->VidyoConnect: end spinner & display \n**joinCall** page for meeting
+
+
 @enduml
+
