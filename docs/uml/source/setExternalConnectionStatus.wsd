@@ -1,0 +1,45 @@
+@startuml
+title "Connect / Disconnect flow"
+hide footbox
+hide unlinked
+autonumber "[0] "
+
+box "User" #LightGreen
+participant "Patient" as Patient << (U, #ccebc5) user >>
+participant "Browser" as Browser << (U, #ccebc5) user >>
+end box
+
+box "Vidyo Components" #LightBlue
+participant "Vidyo Epic Service" as VidyoEpicService << (C, #b3cde3) Vidyo >>
+participant "Portal" as Portal << (C, #b3cde3) Vidyo >>
+participant "Portal Database/Query Parameter Service" as PortalDB << (C, #b3cde3) Vidyo >>
+participant "Event Server" as EventServer << (C, #b3cde3) Vidyo >>
+participant "VidyoConnect App" as VidyoConnect << (C, #b3cde3  ) Vidyo >>
+end box
+
+box "Epic Components" #LightCoral
+participant "Epic" as Epic << (E, #fbb4ae) EPIC >>
+participant "Epic Web Service" as EPS << (E, #fbb4ae) EPIC >>
+end box
+
+== Oauth 2.0 Launch flow ==
+note right Patient: Oauth handshake occurs here. [Refer to Oauth 2.0 launch diagram] \n At end of handshake we have a **accessToken** for the patient cached in Vidyo Epic Service
+
+== Join Room ==
+Patient->VidyoConnect: join room
+VidyoConnect->Portal : join
+Portal->VidyoEpicService : update connection status
+VidyoEpicService->EPS: **Connect()** using patients **accessToken** 
+... vidyo call begins...
+Patient->VidyoConnect: endCall
+VidyoConnect->Portal: disconnect
+Portal->VidyoEpicService: update connection status
+VidyoEpicService->EPS: **Disconnect()** using patients **accessToken** 
+... later...
+== post call cleanup ==
+Portal->Portal : cleanup cache for expired appointments
+Portal->VidyoEpicService : cleanup cache for tokens associated with expired appointments
+VidyoEpicService->VidyoEpicService: cleanup cache
+
+@enduml
+
