@@ -1,5 +1,5 @@
 @startuml
-title "Backend Oauth 2.0 with Epic"
+title "Backend Service Oauth 2.0 with Epic"
 hide footbox
 hide unlinked
 
@@ -22,15 +22,15 @@ participant "Epic App Orchard" as EPIC << (E, #fbb4ae) EPIC >>
 participant "Epic Web Service" as EPS << (E, #fbb4ae) EPIC >>
 end box
 
-==Register Backend Service with Epic App Orchard==
+==1. Register Backend Service with Epic App Orchard==
 VidyoEpicService->VidyoEpicService: generate **{publicKey, privateKey}**
 VidyoEpicService<->EPIC : register backed app with **clientID, publicKey**
-==Get backend service access token==
+==2. Get backend service access token==
 VidyoEpicService->VidyoEpicService : generate **JWT** containing **clientID** \n signed with **privateKey**
 VidyoEpicService->EPS : exchange **JWT** for **backendServiceAccessToken** 
 EPS->EPS : validate **JWT**
 VidyoEpicService<--EPS : return **backendServiceAccessToken**
 VidyoEpicService->VidyoEpicService : cache **backendServiceAccessToken**
-==Using the backendServiceAccessToken==
+==3. Use the backendServiceAccessToken==
 VidyoEpicService->EPS : use **backendServiceAccessToken** \nfor calling **GetTelehealthDirectLaunchToken()**
 @enduml
